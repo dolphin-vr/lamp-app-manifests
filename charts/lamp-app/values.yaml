@@ -1,0 +1,50 @@
+namespace: lamp-app
+
+# Image settings
+images:
+  registry: ghcr.io/dolphin-vr/lamp-app-source
+  phpTag: "latest"
+  apacheTag: "latest"
+  pullPolicy: Always
+
+# MySQL settings
+mysql:
+  image: mysql:9.6
+  database: "dbmovies"
+  storage:
+    size: 5Gi
+    storageClass: "nfs-client"
+
+# PHP-FPM settings
+php:
+  replicas: 2
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "256Mi"
+      cpu: "200m"
+
+# Apache settings
+apache:
+  replicas: 2
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "256Mi"
+      cpu: "200m"
+
+# Ingress settings
+ingress:
+  enabled: true
+  className: traefik  # is not used in IngressRoute, but can be left for consistency
+  host: lamp.ocean.lan
+  tls:
+    enabled: true
+    secretName: lamp-tls-cert
+    issuerName: ocean-ca  # our ClusterIssuer
+    certResolver: ""  # For Let's Encrypt through Traefik (optional, not needed for cert-manager)
+```

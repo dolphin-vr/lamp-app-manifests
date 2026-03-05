@@ -1,0 +1,6 @@
+apiVersion: v2
+name: lamp-app
+description: LAMP stack application with MySQL master
+type: application
+version: 0.1.0
+appVersion: "1.0"
