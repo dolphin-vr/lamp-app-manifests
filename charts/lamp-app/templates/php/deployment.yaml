@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: php
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: php
+    tier: backend
+spec:
+  replicas: {{ .Values.php.replicas }}
+  selector:
+    matchLabels:
+      app: php
+      tier: backend
+  template:
+    metadata:
+      labels:
+        app: php
+        tier: backend
+    spec:
+      containers:
+      - name: php
+        image: {{ .Values.images.registry }}/php:{{ .Values.images.phpTag }}
+        imagePullPolicy: {{ .Values.images.pullPolicy }}
+        ports:
+        - containerPort: 9000
+          name: php-fpm
+        livenessProbe:
+          tcpSocket:
+            port: 9000
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 5
+        readinessProbe:
+          tcpSocket:
+            port: 9000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+        resources:
+          requests:
+            memory: {{ .Values.php.resources.requests.memory }}
+            cpu: {{ .Values.php.resources.requests.cpu }}
+          limits:
+            memory: {{ .Values.php.resources.limits.memory }}
+            cpu: {{ .Values.php.resources.limits.cpu }}
+      imagePullSecrets:
+      - name: ghcr-secret  # For accessing GitHub Container Registry

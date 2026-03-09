@@ -1,0 +1,44 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: lamp-app
+  namespace: argocd # ArgoCD usualy installed in namespace argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io # Cleanup resources on Application removal
+spec:
+  project: default # ArgoCD project
+
+  source:
+    repoURL: https://github.com/dolphin-vr/lamp-app-manifests.git
+    targetRevision: release # branch or tag to deploy
+    path: charts/lamp-app # path to Helm chart
+    helm:
+      valueFiles:
+        - values.yaml # use values.yaml
+
+  destination:
+    server: https://kubernetes.default.svc # Cluster API server
+    namespace: lamp-app # Namespace to deploy to
+
+  syncPolicy:
+    automated:
+      prune: true # delete resources that are no longer in Git
+      selfHeal: true # Automatically fix drift (if someone manually changed the resource)
+      allowEmpty: false
+    syncOptions:
+      - CreateNamespace=true # Automatically create namespace if it doesn't exist
+      - PrunePropagationPolicy=foreground # First delete dependencies, then the main resource
+      - PruneLast=true # delete resources after sync
+    retry:
+      limit: 5 # try 5 times on failure
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+
+  # Application health checks (optional, ArgoCD can auto-detect most resources)
+  ignoreDifferences:
+    - group: apps
+      kind: Deployment
+      jsonPointers:
+        - /spec/replicas # Ignore changes to replicas (if you are using HPA)
