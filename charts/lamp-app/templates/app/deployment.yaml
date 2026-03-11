@@ -1,0 +1,119 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: apache-php
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: apache-php
+    tier: frontend
+spec:
+  replicas: {{ .Values.app.replicas }}
+  selector:
+    matchLabels:
+      app: apache-php
+      tier: frontend
+  template:
+    metadata:
+      labels:
+        app: apache-php
+        tier: frontend
+    spec:
+      # initContainer copy PHP-files from PHP-image to shared volume
+      # before Apache and PHP-FPM start.
+      # This allows using official images without customization and keeps files in one place for both containers.
+      initContainers:
+      - name: php-init
+        image: {{ .Values.images.registry }}/php:{{ .Values.images.phpTag }}
+        imagePullPolicy: {{ .Values.images.pullPolicy }}
+        command: ['sh', '-c', 'cp -r /var/www/html/. /app/ && echo "Files copied:" && ls /app/']
+        volumeMounts:
+        - name: app-data
+          mountPath: /app
+
+      containers:
+      # Apache: serves static content and proxies PHP → localhost:9000 (PHP-FPM in the same pod)
+      - name: apache
+        image: {{ .Values.images.registry }}/apache:{{ .Values.images.apacheTag }}
+        imagePullPolicy: {{ .Values.images.pullPolicy }}
+        ports:
+        - containerPort: 80
+          name: http
+        volumeMounts:
+        - name: app-data
+          mountPath: /var/www/html
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 15
+          periodSeconds: 10
+          timeoutSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+        resources:
+          requests:
+            memory: {{ .Values.app.apache.resources.requests.memory }}
+            cpu: {{ .Values.app.apache.resources.requests.cpu }}
+          limits:
+            memory: {{ .Values.app.apache.resources.limits.memory }}
+            cpu: {{ .Values.app.apache.resources.limits.cpu }}
+
+      # PHP-FPM: handles PHP in the same pod, files — from the shared volume
+      - name: php-fpm
+        image: {{ .Values.images.registry }}/php:{{ .Values.images.phpTag }}
+        imagePullPolicy: {{ .Values.images.pullPolicy }}
+        ports:
+        - containerPort: 9000
+          name: php-fpm
+        env:
+        - name: DB_HOST
+          value: mysql-service
+        - name: DB_NAME
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: MYSQL_DATABASE
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: MYSQL_USER
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: MYSQL_PASSWORD
+        volumeMounts:
+        - name: app-data
+          mountPath: /var/www/html
+        livenessProbe:
+          tcpSocket:
+            port: 9000
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 5
+        readinessProbe:
+          tcpSocket:
+            port: 9000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+        resources:
+          requests:
+            memory: {{ .Values.app.php.resources.requests.memory }}
+            cpu: {{ .Values.app.php.resources.requests.cpu }}
+          limits:
+            memory: {{ .Values.app.php.resources.limits.memory }}
+            cpu: {{ .Values.app.php.resources.limits.cpu }}
+
+      volumes:
+      - name: app-data
+        emptyDir: {}  # shared volume for Apache and PHP-FPM in the same pod
+
+      imagePullSecrets:
+      - name: ghcr-secret

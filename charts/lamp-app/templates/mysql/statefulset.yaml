@@ -7,7 +7,7 @@ metadata:
     app: mysql
     tier: database
 spec:
-  serviceName: mysql-headless  # important for StatefulSet
+  serviceName: mysql-headless
   replicas: 1
   selector:
     matchLabels:
@@ -20,11 +20,15 @@ spec:
         tier: database
     spec:
       securityContext:
-        fsGroup: 999
+        fsGroup: 999        # Kubernetes set right permissions on PV for mysql-data
       containers:
       - name: mysql
         image: {{ .Values.mysql.image }}
         imagePullPolicy: IfNotPresent
+        securityContext:
+          runAsUser: 999    # uid mysql in official image
+          runAsGroup: 999   # gid mysql in official image
+          # Container starts as user mysql → entrypoint.sh skips chown
         ports:
         - containerPort: 3306
           name: mysql
@@ -85,7 +89,7 @@ spec:
       - name: mysql-init-scripts
         configMap:
           name: mysql-init-scripts
-  volumeClaimTemplates:  # StatefulSet automatically creates PVC for each pod
+  volumeClaimTemplates:
   - metadata:
       name: mysql-data
     spec:

@@ -15,36 +15,33 @@ mysql:
     size: 5Gi
     storageClass: "nfs-client"
 
-# PHP-FPM settings
-php:
+# Apache + PHP-FPM (sidecar in the same pod) settings
+app:
   replicas: 2
-  resources:
-    requests:
-      memory: "128Mi"
-      cpu: "100m"
-    limits:
-      memory: "256Mi"
-      cpu: "200m"
-
-# Apache settings
-apache:
-  replicas: 2
-  resources:
-    requests:
-      memory: "128Mi"
-      cpu: "100m"
-    limits:
-      memory: "256Mi"
-      cpu: "200m"
+  apache:
+    resources:
+      requests:
+        memory: "128Mi"
+        cpu: "100m"
+      limits:
+        memory: "256Mi"
+        cpu: "200m"
+  php:
+    resources:
+      requests:
+        memory: "128Mi"
+        cpu: "100m"
+      limits:
+        memory: "256Mi"
+        cpu: "200m"
 
 # Ingress settings
 ingress:
   enabled: true
-  className: traefik  # is not used in IngressRoute, but can be left for consistency
+  className: traefik
   host: lamp.ocean.lan
   tls:
     enabled: true
     secretName: lamp-tls-cert
-    issuerName: ocean-ca  # our ClusterIssuer
-    certResolver: ""  # For Let's Encrypt through Traefik (optional, not needed for cert-manager)
-
+    issuerName: ocean-ca
+    certResolver: ""
