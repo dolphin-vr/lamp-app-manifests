@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-config
+  namespace: {{ .Values.namespace }}
+data:
+  nfs.cnf: |
+    [mysqld]
+    # NFS does not support O_DIRECT and native AIO — switch to fsync
+    innodb_use_native_aio = 0
+    innodb_flush_method   = fsync

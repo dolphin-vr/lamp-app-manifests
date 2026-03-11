@@ -58,6 +58,8 @@ spec:
           mountPath: /var/lib/mysql
         - name: mysql-init-scripts
           mountPath: /docker-entrypoint-initdb.d
+        - name: mysql-config
+          mountPath: /etc/mysql/conf.d
         livenessProbe:
           exec:
             command:
@@ -89,6 +91,9 @@ spec:
       - name: mysql-init-scripts
         configMap:
           name: mysql-init-scripts
+      - name: mysql-config
+        configMap:
+          name: mysql-config
   volumeClaimTemplates:
   - metadata:
       name: mysql-data
