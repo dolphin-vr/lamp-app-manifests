@@ -4,6 +4,14 @@ metadata:
   name: mysql-init-scripts
   namespace: {{ .Values.namespace }}
 data:
+  02-grant-user.sh: |
+    #!/bin/bash
+    # Explicitly grant access from any host — needed because PHP-FPM runs
+    # in a sidecar pod with a dynamic cluster IP, not on localhost
+    mysql -u root -p"${MYSQL_ROOT_PASSWORD}" <<EOF
+    GRANT ALL PRIVILEGES ON ${MYSQL_DATABASE}.* TO '${MYSQL_USER}'@'%' IDENTIFIED BY '${MYSQL_PASSWORD}';
+    FLUSH PRIVILEGES;
+    EOF
   01-init-database.sql: |
     -- Create database and use it
     CREATE DATABASE IF NOT EXISTS {{ .Values.mysql.database }} 
