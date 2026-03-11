@@ -47,4 +47,4 @@ ingress:
     secretName: lamp-tls-cert
     issuerName: ocean-ca  # our ClusterIssuer
     certResolver: ""  # For Let's Encrypt through Traefik (optional, not needed for cert-manager)
-```
+
