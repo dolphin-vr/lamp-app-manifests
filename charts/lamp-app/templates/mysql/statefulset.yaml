@@ -19,6 +19,8 @@ spec:
         app: mysql
         tier: database
     spec:
+      securityContext:
+        fsGroup: 999
       containers:
       - name: mysql
         image: {{ .Values.mysql.image }}
