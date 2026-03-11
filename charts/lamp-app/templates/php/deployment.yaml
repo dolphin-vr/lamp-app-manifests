@@ -25,6 +25,24 @@ spec:
         ports:
         - containerPort: 9000
           name: php-fpm
+        env:
+        - name: DB_HOST
+          value: mysql-service
+        - name: DB_NAME
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: MYSQL_DATABASE
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: MYSQL_USER
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: MYSQL_PASSWORD
         livenessProbe:
           tcpSocket:
             port: 9000
