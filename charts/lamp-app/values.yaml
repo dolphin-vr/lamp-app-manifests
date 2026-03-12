@@ -3,8 +3,8 @@ namespace: lamp-app
 # Image settings
 images:
   registry: ghcr.io/dolphin-vr/lamp-app-source
-  phpTag: "release-bf48d50"
-  apacheTag: "release-bf48d50"
+  phpTag: "release-c2a342b"
+  apacheTag: "release-c2a342b"
   pullPolicy: Always
 
 # MySQL settings
