@@ -1,0 +1,20 @@
+{{- if .Values.phpmyadmin.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: phpmyadmin-service
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: phpmyadmin
+    tier: admin
+spec:
+  type: ClusterIP
+  ports:
+  - port: 80
+    targetPort: 80
+    protocol: TCP
+    name: http
+  selector:
+    app: phpmyadmin
+    tier: admin
+{{- end }}

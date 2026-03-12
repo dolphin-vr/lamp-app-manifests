@@ -35,6 +35,19 @@ app:
         memory: "256Mi"
         cpu: "200m"
 
+# phpMyAdmin settings
+phpmyadmin:
+  enabled: true
+  image: phpmyadmin:5.2.3-apache
+  host: phpmyadmin.ocean.lan
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "256Mi"
+      cpu: "200m"
+
 # Ingress settings
 ingress:
   enabled: true
