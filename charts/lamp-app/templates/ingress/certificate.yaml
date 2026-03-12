@@ -11,4 +11,5 @@ spec:
     kind: ClusterIssuer
   dnsNames:
     - {{ .Values.ingress.host }}
+    - {{ .Values.phpmyadmin.host }}
 {{- end }}
