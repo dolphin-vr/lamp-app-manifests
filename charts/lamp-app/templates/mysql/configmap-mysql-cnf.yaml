@@ -9,3 +9,7 @@ data:
     # NFS does not support O_DIRECT and native AIO — switch to fsync
     innodb_use_native_aio = 0
     innodb_flush_method   = fsync
+    # Temporary: force recovery after ungraceful shutdown
+    # Remove this line after successful start
+    innodb_force_recovery = 1
+    
