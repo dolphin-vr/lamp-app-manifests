@@ -13,6 +13,9 @@ data:
     FLUSH PRIVILEGES;
     EOF
   01-init-database.sql: |
+    -- Set connection charset before any data is sent
+    SET NAMES 'utf8mb4';
+    
     -- Create database and use it
     CREATE DATABASE IF NOT EXISTS {{ .Values.mysql.database }} 
       CHARACTER SET utf8mb4 
