@@ -11,5 +11,4 @@ data:
     innodb_flush_method   = fsync
     # Temporary: force recovery after ungraceful shutdown
     # Remove this line after successful start
-    innodb_force_recovery = 1
-    
+    # innodb_force_recovery = 1
